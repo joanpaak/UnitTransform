@@ -31,6 +31,10 @@ See R code of the simulation for a practical implementation.
 
 To test the transformation, I programmed a simple Metropolis algorithm that samples from Dirichlet distribution. At face value, based on this simulation, it would seem that everything should be functioning as intended.
 
+Histograms show the approximated marginals of Dirichlet(2, 56, 20) distribution against analytically known marginals:
+
+![Results from the simulation](https://github.com/joanpaak/UnitTransform/blob/main/simulation_1_results.png)
+
 
 
 # Sources
