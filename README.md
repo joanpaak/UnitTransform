@@ -25,11 +25,13 @@ Finding the proportions is ever so slightly more complicated. The first proporti
 
 Jacobian for the ordered transform is simply the product of the exponentiated values of the sampled parameters[2]. For the logit transform the Jacobian is logistic(y) * (1 - logistic(y)). The first sample does not undergo the ordered transform, but every other sample is first transformed to the ordered scale and then logit transformed.
 
-See R code of the simulation for a practical implementation.
+See [R code](https://github.com/joanpaak/UnitTransform/blob/main/R/simulation_1) of the simulation for a practical implementation.
 
 ## A simulation
 
 To test the transformation, I programmed a simple Metropolis algorithm that samples from Dirichlet distribution. At face value, based on this simulation, it would seem that everything should be functioning as intended.
+
+Code for the simulation is [here](https://github.com/joanpaak/UnitTransform/blob/main/R/simulation_1).
 
 Histograms show the approximated marginals of Dirichlet(2, 56, 20) distribution against analytically known marginals:
 
