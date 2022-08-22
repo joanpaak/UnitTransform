@@ -1,0 +1,101 @@
+#
+# REQUIRES THE PACKAGE LaplacesDemon
+#
+# In this file we sample stuff from a dirichlet 
+# distribution with parameters defined in the 
+# vector targetAlpha. The marginals are then 
+# compared against histograms of the MCMC samples.
+
+
+# This does the actual transformation
+# INPUT:
+#   y  : vector on unconstrained scale
+# OUPUT:
+#  list with attributes:
+#    theta : the transformed vector
+#    J     : Jacobian of the transformation
+transformToUnitVector = function(y){
+  x = y
+  K = length(x) + 1
+  x[2:(K - 1)] = exp(x[2:(K - 1)])
+  x = cumsum(x)
+  
+  p = rep(0, K)
+  
+  # The first and the last values:
+  p[1] = plogis(x[1])
+  p[K] = 1 - plogis(x[K-1])
+  
+  for(i in 2:(K - 1)){
+    p[i] = plogis(x[i]) - plogis(x[i - 1])
+  }
+  
+  J = prod(c(1, exp(y[2:(K-1)])) * (plogis(x) * (1 - plogis(x))))
+  
+  return(list(theta = p, J = J))
+}
+
+
+# This is the target distribution, that is, 
+# Dirichlet distribution with parameters  defined 
+# in the vector alpha
+logTarget = function(y, alpha){
+  transformedVector = transformToUnitVector(y)
+  
+  LaplacesDemon::ddirichlet(transformedVector$theta, 
+                            alpha, 
+                            log = T) + log(transformedVector$J)
+}
+
+
+##
+
+targetAlpha = c(2,56, 20)
+
+nsteps = 20000
+x = matrix(NaN, 
+           ncol = length(targetAlpha) - 1,
+           nrow = nsteps)
+
+x[1,] = rnorm(length(targetAlpha) - 1)
+
+for(i in 1:(nsteps-1)){
+  # Standard deviation of the proposal distribution is 
+  # not really based on anything, it's just a guess.
+  prop = rnorm(length(targetAlpha) - 1, x[i,], 0.4)
+  logPProp = logTarget(prop, targetAlpha)
+  logPCurr = logTarget(x[i,], targetAlpha)
+  
+  pAccept = logPProp - logPCurr
+  if(is.nan(pAccept)) pAccept = -Inf
+  
+  if(log(runif(1)) < pAccept){
+    x[i+1,] = prop
+  } else {
+    x[i+1,] = x[i,]
+  }
+}
+
+
+# The unconstrained vectors are here transformed to
+# constained scale:
+x_p = matrix(NaN, ncol = ncol(x) + 1, nrow = nrow(x))
+
+for(i in 1:nrow(x)){
+  x_p[i,] = transformToUnitVector(x[i,])$theta
+}
+
+
+# Since the marginals of the Dirichlet distribution are Beta 
+# distributions, we can compare histograms of the samples 
+# against the known distributions:
+
+par(mfrow = c(1,3))
+
+for(i in 1:3){
+  hist(x_p[,i], prob = T, breaks = 40, main = "")
+  curve(dbeta(x, targetAlpha[i], 
+              sum(targetAlpha) - targetAlpha[i]),
+        add = T, col = "red")
+}
+
