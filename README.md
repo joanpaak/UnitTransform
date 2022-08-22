@@ -20,6 +20,10 @@ The ordered transform can be done simply by exponentiating all but the first sam
 
 Finding the proportions is ever so slightly more complicated. The first proportion is simply the integral from negative infinity to the first sampled value; the last is, on the contrary, 1 minus integral to the last sampled value. Values in between are always found by first finding the integral the cutpoint i and substracting the integral to the cut point i - 1 from it.
 
+This idea is illustrated in the figure below:
+
+
+![A figure showing the above idea visually](https://github.com/joanpaak/UnitTransform/blob/main/basic_idea.png)
 
 ## Jacobian
 
